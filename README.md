@@ -49,7 +49,12 @@ ak-react/
     favicon.ico
   src/
     assets/
-    containers/
+    components/
+      Header/
+      List/
+      Message/
+      Selector/
+      TimeTo/
     containers/
       App/
         App.css
