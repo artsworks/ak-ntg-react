@@ -3,32 +3,21 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 
 class TimeTo extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            highlight: false,
-            timeTo: '0m 0s'
-        };
-    }
-
-    componentDidMount() {
+    render() {
         const minutesTo = moment(this.props.time).diff(this.props.now, 'minutes');
         const secondsTo = moment(this.props.time).diff(this.props.now, 'seconds');
+        const timeTo = `${minutesTo}m ${Math.abs(secondsTo - (minutesTo * 60))}s`;
         const highlight = secondsTo < 120;
-        this.setState({
-            highlight,
-            timeTo: `${minutesTo}m ${secondsTo - (minutesTo * 60)}s`
-        });
-    }
 
-    render() {
         return (
-            <div className={this.timeClassName()} key={this.state.timeTo}> {this.state.timeTo}</div>
+            <div className={this.timeClassName(highlight)} key={timeTo}> {timeTo}</div>
         )
     }
 
-    timeClassName() {
-        return `App__content-list-item-time ${this.state.highlight ? 'App__content-list-item-time--highlight' : ''}`;
+    timeClassName(highlight) {
+        let className = 'App__content-list-item-time';
+        className += highlight ? ' App__content-list-item-time--highlight' : '';
+        return className;
     }
 }
 

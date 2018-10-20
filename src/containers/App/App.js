@@ -9,8 +9,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      // now: moment(),
-      now: moment('2018-09-10T02:16:30Z'),
+      now: process.env.REACT_APP_TIMENOW ? moment(process.env.REACT_APP_TIMENOW) : moment(),
       message: '',
       selected: 0,
       races: [],
@@ -19,8 +18,6 @@ class App extends Component {
   }
 
   componentDidMount() {
-    // const races = [{ "id": 30431079, "time": "2018-09-10T02:08:00Z", "timeTo": "9m 1s", "name": "Lucky Creed Qualifying Pace", "number": 3, "type": 2 }, { "id": 30383194, "time": "2018-09-10T02:13:00Z", "timeTo": "4m", "name": "J P Print, Petone C4", "number": 6, "type": 3 }, { "id": 30362524, "time": "2018-09-10T02:17:00Z", "timeTo": "2s", "name": "Carisbrook Motors Pace", "number": 1, "type": 2 }, { "id": 30404697, "time": "2018-09-10T02:20:00Z", "timeTo": "3m", "name": "Race 1 - 1400", "number": 1, "type": 1 }, { "id": 30360464, "time": "2018-09-10T02:23:00Z", "timeTo": "6m", "name": "A1 Signage", "number": 2, "type": 3 }];
-    // this.setState({ races, racesFiltered: races });
     this.fetchData();
     this.tick();
   }
@@ -29,7 +26,6 @@ class App extends Component {
     axios
       .get(`https://s3-ap-southeast-2.amazonaws.com/bet-easy-code-challenge/next-to-jump`, { crossdomain: true })
       .then(res => {
-        console.log(res.data);
         if (res.data.success) {
           const races = res.data.result.map((race) => {
             const timeTo = `${this.state.now.diff(race.AdvertisedStartTime, 'minutes')}m ${this.state.now.diff(race.AdvertisedStartTime, 'seconds')}s`;
@@ -42,18 +38,19 @@ class App extends Component {
               type: race.EventType.EventTypeID,
             }
           });
-          console.log('races:', races);
           this.setState({ races, racesFiltered: races, message: '' });
         } else {
           this.setState({ message: 'Unable to refresh data' });
         }
+      }, err => {
+        this.setState({ message: 'Error fetching data' });
+        console.error(err);
       });
   }
 
   tick() {
     setInterval(() => {
       this.setState({ now: this.state.now.add(1, 'second')});
-      console.log('ticking..', this.state.now.toDate());
     }, 1000);
   }
 
