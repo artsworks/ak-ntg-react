@@ -32,6 +32,10 @@ Open [http://localhost:80](http://localhost:80) to view it in the browser.
 The page will reload if you make edits.<br>
 You will also see any lint errors in the console.
 
+### `yarn test`
+
+Runs `react-scripts test` that will run written test also check current code against saved snapshot.
+
 ## Folder Structure
 
 ```
