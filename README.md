@@ -5,10 +5,10 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 ## Task completed
 1. Data request from [API](https://s3-ap-southeast-2.amazonaws.com/bet-easy-code-challenge/next-to-jump
 ) using axios
-2. Data displayed up-to-date with ticking countdown
+2. Data displayed up-to-date with ticking countdown (red highlight below 120sec)
 3. Required fields (Event Name, Event Venue, Time the event starts, iconography)
 4. UI styling as BetEasy Brand
-5. ~~Unit test~~: _past time limit requirement_
+5. Unit test: _exceeding time limit, but added quick snapshot test for stateless component_
 6. Filter races by type
 7. Error handling from API
 
