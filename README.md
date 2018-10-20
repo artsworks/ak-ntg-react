@@ -1,6 +1,6 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-![image](https://user-images.githubusercontent.com/7718628/47253435-3f7edc80-d49e-11e8-850a-1acc734af350.png)
+![image](https://user-images.githubusercontent.com/7718628/47253486-3b9f8a00-d49f-11e8-9ecb-d1a23ae0e80d.png)
 
 ## Task completed
 1. Data request from [API](https://s3-ap-southeast-2.amazonaws.com/bet-easy-code-challenge/next-to-jump
