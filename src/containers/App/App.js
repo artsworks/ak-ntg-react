@@ -1,13 +1,17 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import * as moment from 'moment';
+import moment from 'moment';
 import './App.scss';
+
+import TimeTo from '../../components/TimeTo/TimeTo';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      now: moment(),
+      // now: moment(),
+      now: moment('2018-09-10T02:16:30Z'),
+      message: '',
       selected: 0,
       races: [],
       racesFiltered: []
@@ -15,14 +19,10 @@ class App extends Component {
   }
 
   componentDidMount() {
-    const races = [{ "id": 30431079, "time": "2018-09-10T02:08:00Z", "timeTo": "9 minutes ago", "name": "Lucky Creed Qualifying Pace", "number": 3, "type": 2 }, { "id": 30383194, "time": "2018-09-10T02:13:00Z", "timeTo": "4 minutes ago", "name": "J P Print, Petone C4", "number": 6, "type": 3 }, { "id": 30362524, "time": "2018-09-10T02:17:00Z", "timeTo": "in a few seconds", "name": "Carisbrook Motors Pace", "number": 1, "type": 2 }, { "id": 30404697, "time": "2018-09-10T02:20:00Z", "timeTo": "in 3 minutes", "name": "Race 1 - 1400", "number": 1, "type": 1 }, { "id": 30360464, "time": "2018-09-10T02:23:00Z", "timeTo": "in 6 minutes", "name": "A1 Signage", "number": 2, "type": 3 }];
-    this.setState({ races, racesFiltered: races });
-  }
-
-  tick() {
-    setInterval(() => {
-      this.setState({ now: this.state.now.add(1, 'second') });
-    }, 1000);
+    // const races = [{ "id": 30431079, "time": "2018-09-10T02:08:00Z", "timeTo": "9m 1s", "name": "Lucky Creed Qualifying Pace", "number": 3, "type": 2 }, { "id": 30383194, "time": "2018-09-10T02:13:00Z", "timeTo": "4m", "name": "J P Print, Petone C4", "number": 6, "type": 3 }, { "id": 30362524, "time": "2018-09-10T02:17:00Z", "timeTo": "2s", "name": "Carisbrook Motors Pace", "number": 1, "type": 2 }, { "id": 30404697, "time": "2018-09-10T02:20:00Z", "timeTo": "3m", "name": "Race 1 - 1400", "number": 1, "type": 1 }, { "id": 30360464, "time": "2018-09-10T02:23:00Z", "timeTo": "6m", "name": "A1 Signage", "number": 2, "type": 3 }];
+    // this.setState({ races, racesFiltered: races });
+    this.fetchData();
+    this.tick();
   }
 
   fetchData() {
@@ -30,18 +30,31 @@ class App extends Component {
       .get(`https://s3-ap-southeast-2.amazonaws.com/bet-easy-code-challenge/next-to-jump`, { crossdomain: true })
       .then(res => {
         console.log(res.data);
-        const races = res.data.result.map((race) => {
-          return {
-            id: race.EventID,
-            time: race.AdvertisedStartTime,
-            timeTo: this.state.now.to(race.AdvertisedStartTime),
-            name: race.EventName,
-            number: race.RaceNumber,
-            type: race.EventType.EventTypeID,
-          }
-        });
-        this.setState({ races });
+        if (res.data.success) {
+          const races = res.data.result.map((race) => {
+            const timeTo = `${this.state.now.diff(race.AdvertisedStartTime, 'minutes')}m ${this.state.now.diff(race.AdvertisedStartTime, 'seconds')}s`;
+            return {
+              id: race.EventID,
+              time: race.AdvertisedStartTime,
+              timeTo: timeTo,
+              name: race.EventName,
+              number: race.RaceNumber,
+              type: race.EventType.EventTypeID,
+            }
+          });
+          console.log('races:', races);
+          this.setState({ races, racesFiltered: races, message: '' });
+        } else {
+          this.setState({ message: 'Unable to refresh data' });
+        }
       });
+  }
+
+  tick() {
+    setInterval(() => {
+      this.setState({ now: this.state.now.add(1, 'second')});
+      console.log('ticking..', this.state.now.toDate());
+    }, 1000);
   }
 
   initialiseList() {
@@ -65,7 +78,7 @@ class App extends Component {
   getSvg(type) {
     let svg = '';
 
-    switch(type) {
+    switch (type) {
       case 1:
         svg = (<svg aria-hidden="true" preserveAspectRatio="xMidYMid meet" viewBox="0 0 32 32" width="32" height="32" class="cb-svg-icon"><g><path d="M17.72,28.24a.54.54,0,0,1-.48-.32c-.08-.24-.24-.56-.32-.8-.4-.88-.88-1.76-1.28-2.65-.24-.4-.4-.72-.64-1.12l-.24-.4-.48-1a7.06,7.06,0,0,1-.64-2.65.55.55,0,0,1,.56-.56.6.6,0,0,1,.56.56,5.09,5.09,0,0,0,.56,2.17c.16.32.24.56.4.88l.24.4c.16.4.4.72.56,1.12.48.88,1,1.76,1.44,2.73a9.41,9.41,0,0,1,.4.88c.08.32,0,.64-.32.72Zm6.58-5.86a1.53,1.53,0,0,1-1-.56,4.41,4.41,0,0,1-.56-.72c-.08-.16-.24-.24-.32-.4a11.41,11.41,0,0,1-3.13-1.12l-1.12-.16c-.56,0-1.2-.08-1.85-.08a1.51,1.51,0,0,1-.64-.16c-2-.56-2.81-2-2.81-4.25v-.56a.52.52,0,0,1,1,.08v.48c0,1.76.56,2.65,2,3.13a1.07,1.07,0,0,0,.4.08c.56,0,1.2.08,1.85.08l1,.08a.76.76,0,0,1,.56.16,8.18,8.18,0,0,0,2.89,1,1,1,0,0,1,.56.4,1.75,1.75,0,0,0,.32.4c.16.24.32.4.48.64l.16.16.16-.16A1.61,1.61,0,0,1,26,20.54a1.89,1.89,0,0,0,.16-.64,6.07,6.07,0,0,0-.08-1.2v-.24l-.4-.4a4.2,4.2,0,0,1-.8-.88,22.67,22.67,0,0,0-2.65-3,2.28,2.28,0,0,1-.88-1.68l-.08-.16a2.5,2.5,0,0,0-.56-.72c-.32-.4-.56-.64-.72-.88s-.48-.56-.8-1a.6.6,0,0,1,0-.72,6.82,6.82,0,0,0,1.12-3c.08-.24.08-.48.16-.64a.53.53,0,0,1,.64-.4.57.57,0,0,1,.4.72,5.11,5.11,0,0,0-.16.56,9.16,9.16,0,0,1-1,3,4.63,4.63,0,0,1,.64.8c.24.24.4.56.72.88a8.4,8.4,0,0,1,.64.88,1.51,1.51,0,0,1,.32.72,1,1,0,0,0,.48.8,25.35,25.35,0,0,1,2.81,3.13,6.13,6.13,0,0,0,.72.72l.4.4a1,1,0,0,1,.32.56v.32c0,.48.08.88.08,1.44a3.39,3.39,0,0,1-.24,1v.4a.82.82,0,0,1-.4.48.89.89,0,0,1-.64,0,.61.61,0,0,0-.8.08A2.46,2.46,0,0,1,24.29,22.39ZM5,21.1H4.8a.53.53,0,0,1-.4-.64l.16-.56A19.17,19.17,0,0,1,8,12.36a14,14,0,0,1,5-4.17,7.15,7.15,0,0,1,3.13-.72,6,6,0,0,1,1.2-1.52A4.45,4.45,0,0,1,18,5.46l.16-.08A1.88,1.88,0,0,0,19,4.5a.76.76,0,0,1,.8-.32.93.93,0,0,1,.32.8,8.25,8.25,0,0,1-1.2,3.77A.57.57,0,0,1,18,8a4.4,4.4,0,0,0,.64-1.6l-.08.08c-.16.16-.32.24-.48.4a2.86,2.86,0,0,0-1,1.28.51.51,0,0,1-.48.4h-.48a5.94,5.94,0,0,0-2.57.56A14.92,14.92,0,0,0,8.89,13a17.27,17.27,0,0,0-3.21,7.06l-.16.56A.59.59,0,0,1,5,21.1Z"></path></g></svg>);
         break;
@@ -103,6 +116,7 @@ class App extends Component {
             <div className={this.selectorClassName(2)} onClick={() => this.selectorChange(2)}>{this.getSvg(2)}</div>
             <div className={this.selectorClassName(3)} onClick={() => this.selectorChange(3)}>{this.getSvg(3)}</div>
           </div>
+          {this.state.message ? <div className="App__content-message">{this.state.message}</div> : ''}
           <div className="App__content-list">
             {this.state.racesFiltered.map(race =>
               <div className="App__content-list-item" key={race.id}>
@@ -111,7 +125,7 @@ class App extends Component {
                   <p>{race.name}</p>
                   <p className="App__content-list-item-race-no">Race {race.number}</p>
                 </div>
-                <div className="App__content-list-item-time">{race.timeTo}</div>
+                <TimeTo time={race.time} now={this.state.now}></TimeTo>
               </div>
             )}
           </div>
